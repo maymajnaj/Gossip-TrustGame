@@ -1,0 +1,304 @@
+#New Hs
+
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(broom)
+
+
+r1 = read.csv("path/file1", skip = 6, header = TRUE, sep = ",")
+r2 = read.csv("path/file2, skip = 6, header = TRUE, sep = ",")
+
+r = merge(r1, r2, all = TRUE)
+rm(r1, r2)
+
+r$d = r$mean..resource..of.talkers.with..strategy....C.. - r$mean..resource..of.talkers.with..strategy....D..
+hist(r$d)
+r$sdmd = r$d / r$standard.deviation..resource..of.talkers
+hist(r$sdmd)
+
+r$mC = r$mean..resource..of.talkers.with..strategy....C..
+r$mD = r$mean..resource..of.talkers.with..strategy....D..
+r$mres = r$mean..resource..of.talkers
+
+
+lm01 = lm(data = r, mres ~ prop_D + reputation_threshold + gossip_mechanisms)
+anova(lm01)
+summary(lm01)
+write.csv(tidy(lm01),"coef1.cvs")
+
+
+lm02 = lm(data = r, mres ~ prop_D + reputation_threshold + gossip_mechanisms + as.factor(action_rule) + Tg_variant + g_processing + network.type)
+anova(lm02)
+summary(lm02)
+write.csv(tidy(lm02),"coef2.cvs")
+
+lm03 = lm(data = r, mC ~ prop_D + reputation_threshold + gossip_mechanisms + as.factor(action_rule) + Tg_variant + g_processing + network.type)
+anova(lm03)
+summary(lm03)
+write.csv(tidy(lm03),"coef3.cvs")
+
+lm04 = lm(data = r, d ~ prop_D + reputation_threshold + gossip_mechanisms + as.factor(action_rule) + Tg_variant + g_processing + network.type)
+anova(lm04)
+summary(lm04)
+write.csv(tidy(lm04),"coef4.cvs")
+
+
+
+#H1a confirmed = resources grow in gossiping
+
+
+ks.test(r[which(r$gossip_mechanisms == "paralell"),]$mres, r[which(r$gossip_mechanisms != "paralell"),]$mres)
+t.test(r[which(r$gossip_mechanisms == "paralell"),]$mres, r[which(r$gossip_mechanisms != "paralell"),]$mres)
+
+
+
+
+ggplot() +
+  geom_histogram(aes(x = r[which(r$gossip_mechanisms == "simple"),]$sdmd), alpha = 0.2, fill = "green") +
+  geom_histogram(aes(x = r2), alpha = 0.2, fill = "red", color = "black")+
+  geom_histogram(aes(x = r[which(r$gossip_mechanisms == "real"),]$sdmd), alpha = 0.2, fill = "blue") +
+  ylab("Frequency") + xlab("Difference in SD") + 
+  labs(title = "Comparison of payoffs between Cs and Ds", fill = "Information spread")
+
+ggplot(r, aes(x = sdmd, fill = as.factor(gossip_mechanisms))) +
+  geom_histogram(color = "#e9ecef", alpha = 0.45) +
+  ylab("Frequency") + xlab("Difference in SD") + 
+  labs(title = "Comparison of payoffs between Cs and Ds", fill = "TG variant")
+
+count(r[which(r$gossip_mechanisms == "simple"),])
+count(r[which(r$gossip_mechanisms == "real"),])
+count(r[which(r$gossip_mechanisms == "paralell"),])
+
+ggplot(r, aes(x = as.factor(gossip_mechanisms), y = mres, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Mean resources") + xlab("Information spread") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r, aes(x = as.factor(gossip_mechanisms), y = mres, fill = as.factor(prop_D))) + geom_boxplot() +
+  ylab("Mean resources") + xlab("Information spread") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r, aes(x = as.factor(action_rule), y = mres, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Mean resources") + xlab("Information spread") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r, aes(x = as.factor(action_rule), y = mres, fill = as.factor(gossip_mechanisms))) + geom_boxplot() +
+  ylab("Mean resources") + xlab("Information spread") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r, aes(x = as.factor(action_rule), y = mC, fill = as.factor(gossip_mechanisms))) + geom_boxplot() +
+  ylab("Mean resources") + xlab("Information spread") + 
+  labs(title = "", fill = "Threshold")
+
+
+
+
+
+lm01 = lm(data = r, mres ~ prop_D + reputation_threshold + gossip_mechanisms)
+anova(lm01)
+summary(lm01)
+write.csv(tidy(lm01),"coef1.cvs")
+
+
+lm01 = lm(data = r, mres ~ prop_D + reputation_threshold + gossip_mechanisms + as.factor(action_rule) + Tg_variant + g_processing + network.type)
+anova(lm01)
+summary(lm01)
+write.csv(tidy(lm01),"coef1.cvs")
+
+lm01 = lm(data = r, mC ~ prop_D + reputation_threshold + gossip_mechanisms + as.factor(action_rule) + Tg_variant + g_processing + network.type)
+anova(lm01)
+summary(lm01)
+write.csv(tidy(lm01),"coef1.cvs")
+
+lm02 = lm(data = r, d ~ prop_D + reputation_threshold + gossip_mechanisms + as.factor(action_rule) + Tg_variant + g_processing + network.type)
+anova(lm02)
+summary(lm02)
+write.csv(tidy(lm01),"coef1.cvs")
+
+
+
+#H1b confirmed = resources of Cs grow in gossiping
+
+
+ks.test(r[which(r$gossip_mechanisms == "paralell"),]$mC, r[which(r$gossip_mechanisms != "paralell"),]$mC)
+t.test(r[which(r$gossip_mechanisms == "paralell"),]$mC, r[which(r$gossip_mechanisms != "paralell"),]$mC)
+
+
+
+#H1b confirmed = parallel transmission gives Cs the edge
+
+
+ks.test(r[which(r$gossip_mechanisms == "paralell"),]$sdmd, r[which(r$gossip_mechanisms != "paralell"),]$sdmd)
+t.test(r[which(r$gossip_mechanisms == "paralell"),]$sdmd, r[which(r$gossip_mechanisms != "paralell"),]$sdmd)
+
+
+
+#H2a rejected = cooperators outcompete defectors in many scenarios, but only 30% of the time
+#= third action rule works with parallel transmission to even push the mean on the cooperative side
+# = when parallel transmission is present and they do surprisingly well in static networks
+# = well-mixed situation is the most difficult to establish cooperative advantage
+# = 
+
+ggplot(r, aes(x = as.factor(gossip_mechanisms), y = d, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Difference in resources") + xlab("Mechanism of spread") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r, aes(x = as.factor(Tg_variant), y = d, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Difference in resources") + xlab("TG variant") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r, aes(x = as.factor(action_rule), y = d, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Difference in resources") + xlab("Action rule") + 
+  labs(title = "", fill = "Threshold")
+
+
+#plots for article
+ggplot(r, aes(x = as.factor(action_rule), y = sdmd, fill = as.factor(gossip_mechanisms))) + geom_boxplot() +
+  ylab("Difference in SD") + xlab("Action rule") + 
+  labs(title = "", fill = "Mechanism of spread")
+ggplot(r, aes(x = as.factor(Tg_variant), y = sdmd, fill = as.factor(gossip_mechanisms))) + geom_boxplot() +
+  ylab("Difference in resources") + xlab("TG variant") + 
+  labs(title = "", fill = "Mechanism of spread")
+ggplot(r, aes(x = as.factor(Tg_variant), y = sdmd, fill = as.factor(action_rule))) + geom_boxplot() +
+  ylab("Difference in resources") + xlab("TG variant") + 
+  labs(title = "", fill = "Action rule")
+
+ks.test(r[which(r$Tg_variant == "dn"),]$d, r[which(r$Tg_variant == "sn"),]$d)
+t.test(r[which(r$Tg_variant == "dn"),]$d, r[which(r$Tg_variant == "sn"),]$d)
+ks.test(r[which(r$Tg_variant == "dn"),]$mC, r[which(r$Tg_variant == "sn"),]$mC)
+t.test(r[which(r$Tg_variant == "dn"),]$mC, r[which(r$Tg_variant == "sn"),]$mC)
+
+#H2b partially confirmed
+# = realistic gossiping creates slightly higher payoffs, but loses to Ds far more often, even on dn
+
+#meanC
+ks.test(r[which(r$gossip_mechanisms == "paralell"),]$mC, r[which(r$gossip_mechanisms == "real"),]$mC)
+t.test(r[which(r$gossip_mechanisms == "paralell"),]$mC, r[which(r$gossip_mechanisms == "real"),]$mC)
+
+ks.test(r[which(r$gossip_mechanisms == "paralell" & r$Tg_variant == "wm"),]$mC, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "wm"),]$mC)
+t.test(r[which(r$gossip_mechanisms == "paralell"& r$Tg_variant == "wm"),]$mC, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "wm"),]$mC)
+
+ks.test(r[which(r$gossip_mechanisms == "paralell" & r$Tg_variant == "sn"),]$mC, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "sn"),]$mC)
+t.test(r[which(r$gossip_mechanisms == "paralell"& r$Tg_variant == "sn"),]$mC, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "sn"),]$mC)
+
+ks.test(r[which(r$gossip_mechanisms == "paralell" & r$Tg_variant == "dn"),]$mC, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "dn"),]$mC)
+t.test(r[which(r$gossip_mechanisms == "paralell"& r$Tg_variant == "dn"),]$mC, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "dn"),]$mC)
+
+#difference
+ks.test(r[which(r$gossip_mechanisms == "paralell"),]$d, r[which(r$gossip_mechanisms == "real"),]$d)
+t.test(r[which(r$gossip_mechanisms == "paralell"),]$d, r[which(r$gossip_mechanisms == "real"),]$d)
+
+ks.test(r[which(r$gossip_mechanisms == "paralell"),]$mC, r[which(r$gossip_mechanisms == "real"),]$mC)
+t.test(r[which(r$gossip_mechanisms == "paralell"),]$mC, r[which(r$gossip_mechanisms == "real"),]$mC)
+
+ks.test(r[which(r$gossip_mechanisms == "paralell" & r$Tg_variant == "wm"),]$d, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "wm"),]$d)
+t.test(r[which(r$gossip_mechanisms == "paralell"& r$Tg_variant == "wm"),]$d, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "wm"),]$d)
+
+ks.test(r[which(r$gossip_mechanisms == "paralell" & r$Tg_variant == "sn"),]$d, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "sn"),]$d)
+t.test(r[which(r$gossip_mechanisms == "paralell"& r$Tg_variant == "sn"),]$d, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "sn"),]$d)
+
+ks.test(r[which(r$gossip_mechanisms == "paralell" & r$Tg_variant == "dn"),]$d, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "dn"),]$d)
+t.test(r[which(r$gossip_mechanisms == "paralell"& r$Tg_variant == "dn"),]$d, r[which(r$gossip_mechanisms == "real"& r$Tg_variant == "dn"),]$d)
+
+
+
+#H2c partially rejected = we can see from the linear model that effect for difference is positive,
+#= but the only C condition is on average losing to defectors in most conditions (t test)
+
+lm01 = lm(data = r, d ~ prop_D + reputation_threshold + g_processing)
+anova(lm01)
+summary(lm01)
+write.csv(tidy(lm01),"coef1.cvs")
+
+
+ggplot(r[which(r$gossip_mechanisms == "real" & r$g_processing == "onlyC"),], aes(x = as.factor(prop_D), y = d, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Difference in resources") + xlab("Proportion Ds") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r[which(r$gossip_mechanisms == "real" & r$g_processing == "onlyC"),], aes(x = as.factor(prop_D), y = mres, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Amount of resources") + xlab("Proportion Ds") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r[which(r$gossip_mechanisms == "real" & r$g_processing == "onlyC"),], aes(x = as.factor(prop_D), y = mC, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Resources of Cs") + xlab("Proportion Ds") + 
+  labs(title = "", fill = "Threshold")
+
+ggplot(r[which(r$gossip_mechanisms == "real"),], aes(x = as.factor(g_processing), y = sdmd, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Difference in resources SD") + xlab("Proportion Ds") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r, aes(x = as.factor(g_processing), y = sdmd, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Difference in resources SD") + xlab("Proportion Ds") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r[which(r$gossip_mechanisms == "real"),], aes(x = as.factor(g_processing), y = mres, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Mean resources") + xlab("Proportion Ds") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r, aes(x = as.factor(g_processing), y = mres, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Mean resources") + xlab("Proportion Ds") + 
+  labs(title = "", fill = "Threshold")
+
+
+t.test(r[which(r$gossip_mechanisms == "real" & r$g_processing == "onlyC"),]$sdmd)
+
+
+#H2e, d, f 
+
+
+# import datasets with mutations
+
+m1 = read.csv("path/file", skip = 6, header = TRUE, sep = ",")
+
+
+m1$C = m1$count.talkers.with..strategy....C.. / m1$count.talkers
+hist(m1$C)
+m1$r = m1$mean..resource..of.talkers
+
+
+count(m1[which(m1$C == 1),]) / count(m1)
+count(m1[which(m1$C > 0 & m1$network.type != "hungarian_school_4a"),]) / count(m1)
+count(m1[which(m1$C > 0 & m1$C < 1),]) / count(m1)
+
+count(m1[which(m1$how_to_adapt. == "copy_the_best" & m1$C == 1),]) / count(m1)
+count(m1[which(m1$how_to_adapt. == "copy_the_best" & m1$C > 0),]) / count(m1[which(m1$how_to_adapt. == "copy_the_best"),])
+
+
+#ks.test(m1[which(m1$gossip_mechanisms == "real" & m1$g_processing == "truth" & m1$how_to_adapt. == "copy_the_best"),]$C, m1[which(m1$gossip_mechanisms == "real" & m1$g_processing != "truth" & m1$how_to_adapt. == "copy_the_best"),]$C)
+#t.test(m1[which(m1$gossip_mechanisms == "real" & m1$g_processing == "truth" & m1$how_to_adapt. == "copy_the_best"),]$C, m1[which(m1$gossip_mechanisms == "real" & m1$g_processing != "truth" & m1$how_to_adapt. == "copy_the_best"),]$C)
+
+ds = as.data.frame(matrix(1))
+ds[nrow(ds)] = ks.test(m1[which(m1$gossip_mechanisms == "real" & m1$how_to_adapt. == "copy_the_best"),]$C, m1[which(m1$gossip_mechanisms == "real" & m1$how_to_adapt. != "copy_the_best"),]$C)
+ds[nrow(ds), ncol(ds) +1] = t.test(m1[which(m1$gossip_mechanisms == "real"  & m1$how_to_adapt. == "copy_the_best"),]$C, m1[which(m1$gossip_mechanisms == "real" & m1$how_to_adapt. != "copy_the_best"),]$C)
+ds[nrow(ds) + 1,1] = ks.test(m1[which(m1$gossip_mechanisms == "real" & m1$how_to_adapt. == "copy_the_better"),]$C, m1[which(m1$gossip_mechanisms == "real" & m1$how_to_adapt. != "copy_the_better"),]$C)
+ds[nrow(ds),2] = t.test(m1[which(m1$gossip_mechanisms == "real"  & m1$how_to_adapt. == "copy_the_better"),]$C, m1[which(m1$gossip_mechanisms == "real" & m1$how_to_adapt. != "copy_the_better"),]$C)
+ds[nrow(ds) + 1,1] = ks.test(m1[which(m1$gossip_mechanisms == "real" & m1$how_to_adapt. == "generations"),]$C, m1[which(m1$gossip_mechanisms == "real" & m1$how_to_adapt. != "generations"),]$C)
+ds[nrow(ds),2] = t.test(m1[which(m1$gossip_mechanisms == "real"  & m1$how_to_adapt. == "generations"),]$C, m1[which(m1$gossip_mechanisms == "real" & m1$how_to_adapt. != "generations"),]$C)
+
+write.csv(ds, "adapt.csv")
+
+
+
+
+
+#plots for results article
+
+#Fig 3
+
+ggplot() +
+  geom_histogram(aes(x = r[which(r$gossip_mechanisms == "simple"),]$sdmd), alpha = 0.2, fill = "green") +
+  geom_histogram(aes(x = r2), alpha = 0.2, fill = "red", color = "black")+
+  geom_histogram(aes(x = r[which(r$gossip_mechanisms == "real"),]$sdmd), alpha = 0.2, fill = "blue") +
+  ylab("Frequency") + xlab("Difference in SD") + 
+  labs(title = "Comparison of payoffs between Cs and Ds", fill = "Information spread")
+ggplot(r, aes(x = as.factor(gossip_mechanisms), y = sdmd, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Mean resources") + xlab("Information spread") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r, aes(x = as.factor(prop_D), y = mres, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Mean resources") + xlab("Initial amount of Ds") + 
+  labs(title = "", fill = "Threshold")
+ggplot(r, aes(x = as.factor(prop_D), y = mC, fill = as.factor(reputation_threshold))) + geom_boxplot() +
+  ylab("Mean resources of Cs") + xlab("Initial amount of Ds") + 
+  labs(title = "", fill = "Threshold")
+
+
+
+#Fig 4
+ggplot(r, aes(x = as.factor(action_rule), y = sdmd, fill = as.factor(gossip_mechanisms))) + geom_boxplot() +
+  ylab("Difference in SD") + xlab("Action rule") + 
+  labs(title = "", fill = "Mechanism of spread")
+ggplot(r, aes(x = as.factor(Tg_variant), y = sdmd, fill = as.factor(gossip_mechanisms))) + geom_boxplot() +
+  ylab("Difference in resources") + xlab("TG variant") + 
+  labs(title = "", fill = "Mechanism of spread")
+ggplot(r, aes(x = as.factor(Tg_variant), y = sdmd, fill = as.factor(action_rule))) + geom_boxplot() +
+  ylab("Difference in resources") + xlab("TG variant") + 
+  labs(title = "", fill = "Action rule")
